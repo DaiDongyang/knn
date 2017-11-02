@@ -22,11 +22,16 @@ def construct_kd_node(samples, feature, father_node):
     order = np.argsort(samples[:, feature])
     select_idx = order[int(m/2)]
     instance = samples[select_idx, :]
-    left_idxs = order[0:select_idx - 1]
-    right_idxs = order[select_idx + 1:0]
+    left_idxs = order[0:int(m/2)]
+    right_idxs = order[int(m/2) + 1:m]
     node = Node(instance, min_array, max_array, feature, father_node)
     node.left_child = construct_kd_node(samples[left_idxs], feature+1, node)
     node.right_child = construct_kd_node(samples[right_idxs], feature+1, node)
     return node
+
+
+def construct_kd_tree(samples):
+    return construct_kd_node(samples, 0, None)
+
 
 
