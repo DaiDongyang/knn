@@ -6,14 +6,15 @@ def print_kd_tree(node):
     if node is None:
         print("None")
         return
-    print(node.instance)
+    print(node.instance, node.label)
     print_kd_tree(node.left_child)
     print_kd_tree(node.right_child)
 
 
 def test_construct_kd_tree():
     samples = np.array([[2, 3], [5, 4], [9, 6], [4, 7], [8, 1], [7, 2]])
-    kd_tree = KDTree.construct_kd_tree(samples)
+    ls = np.array(list(range(6)))
+    kd_tree = KDTree.construct_kd_tree(samples, ls)
     print_kd_tree(kd_tree)
 
 
