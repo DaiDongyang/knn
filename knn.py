@@ -17,6 +17,8 @@ def get_trains_conv_pinv(train_samples):
         train_T = train_samples.T
         trains_cov = np.cov(train_T)
         trains_cov_pinv = np.linalg.pinv(trains_cov)
+        # train_m = get_ints_m_trans_matrix(train_samples)
+        # trains_cov_pinv = train_m.dot(train_m.T)
     return trains_cov_pinv
 
 
@@ -42,10 +44,23 @@ def load_sample_set(fold_path):
     return np.array(instances), np.array(ls).transpose()
 
 
+def pca_trans(train_samples, test_samples, new_d):
+    miu = np.average(train_samples, axis=0)
+    avg_trains = train_samples - miu
+    cov = np.cov(avg_trains.T)
+    c_roots, Q = np.linalg.eig(cov)
+    indexed_c_roots = zip(c_roots, range(len(c_roots)))
+    sorted_indexed_c_roots = sorted(indexed_c_roots, reverse=True, key=lambda x: x[0])
+    indexs = [item[1] for item in sorted_indexed_c_roots[0:new_d]]
+    trains_m = Q[:, indexs]
+    new_trains = avg_trains.dot(trains_m)
+    new_test = (test_samples - miu).dot(trains_m)
+    return new_trains, new_test
+
+
+
 # get k nearest euclidean distance index to a new instance with training sample
 def get_k_min_e_dist(train_samples, new_inst, k):
-    # diff = train_samples - new_inst
-    # dist_sq = np.diag(np.dot(diff, diff.T))
     diff_sq_matrix = (train_samples - new_inst) ** 2
     dist_sq = np.sum(diff_sq_matrix, axis=1)
     idx = np.argpartition(dist_sq, k)
@@ -64,16 +79,16 @@ def get_k_min_m_dist(train_samples, inst, k):
     return k_idx, np.sqrt(dist_sq[k_idx])
 
 
-def get_ints_m_trans_matrix(train_samples):
-    train_T = train_samples.T
-    trains_cov = np.cov(train_T)
-    ksi, Q = np.linalg.eig(trains_cov)
-    pinv_ksi = np.linalg.pinv(np.diag(ksi))
-    pinv_ksi_sqrt = np.sqrt(pinv_ksi)
-    trans_m = np.dot(Q, pinv_ksi_sqrt)
-    test = (np.dot(trans_m, trans_m.T) - np.linalg.pinv(trains_cov))**2
-    print(np.sum(test.flat))
-    return trans_m
+# def get_ints_m_trans_matrix(train_samples):
+#     train_T = train_samples.T
+#     trains_cov = np.cov(train_T)
+#     ksi, Q = np.linalg.eig(trains_cov)
+#     pinv_ksi = np.linalg.pinv(np.diag(ksi))
+#     pinv_ksi_sqrt = np.sqrt(pinv_ksi)
+#     trans_m = np.dot(Q, pinv_ksi_sqrt)
+#     # test = (np.dot(trans_m, trans_m.T)**2 - np.linalg.pinv(trains_cov)**2)**2
+#     # print(np.sum(test.flat))
+#     return trans_m
 
 
 def trans_featrues(train_samples, test_samples, trans_m):
@@ -104,8 +119,8 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
 def get_test_samples_labels(k, train_samples, train_ls, test_samples, get_k_min_func, get_label_func):
     result = []
     # m transform
-    trans_m = get_ints_m_trans_matrix(train_samples)
-    tran_samples, test_samples = trans_featrues(train_samples, test_samples, trans_m)
+    # trans_m = get_ints_m_trans_matrix(train_samples)
+    # tran_samples, test_samples = trans_featrues(train_samples, test_samples, trans_m)
     # todo: remove tqdm
     for inst in tqdm(test_samples):
         k_idx, k_dist = get_k_min_func(train_samples, inst, k)
