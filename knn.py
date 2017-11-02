@@ -52,6 +52,7 @@ def get_k_min_e_dist(train_samples, new_inst, k):
     return k_idx, np.sqrt(dist_sq[k_idx])
 
 
+# method for calculate Mahalay distance before optimization
 def get_k_min_m_dist(train_samples, inst, k):
     pinv = get_trains_conv_pinv(train_samples)
     diff_matrix = train_samples - inst
@@ -59,6 +60,18 @@ def get_k_min_m_dist(train_samples, inst, k):
     idx = np.argpartition(dist_sq, k)
     k_idx = idx[0:k]
     return k_idx, np.sqrt(dist_sq[k_idx])
+
+
+def get_ints_m_trans_matrix(train_samples):
+    train_T = train_samples.T
+    trains_cov = np.cov(train_T)
+    ksi, Q = np.linalg.eig(trains_cov)
+    pinv_ksi = np.linalg.pinv(np.diag(ksi))
+    pinv_ksi_sqrt = np.sqrt(pinv_ksi)
+    trans_m = np.dot(Q, pinv_ksi_sqrt)
+    test = np.dot(trans_m, trans_m.T) - np.linalg.pinv(trains_cov)
+    print(np.sum(test))
+    return trans_m
 
 
 # get a label simple by knn method
@@ -79,6 +92,7 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
     l, _ = max(counter.items(), key=lambda x: x[1])
     return l
 
+
 def get_test_samples_labels(k, train_samples, train_ls, test_samples, get_k_min_func, get_label_func):
     result = []
     # todo: remove tqdm
@@ -87,7 +101,3 @@ def get_test_samples_labels(k, train_samples, train_ls, test_samples, get_k_min_
         l = get_label_func(train_ls, k_idx, k_dist)
         result.append(l)
     return np.array(result).transpose()
-
-
-
-

@@ -49,7 +49,7 @@ def test_get_test_samples_labels():
     test_dir = './digits/testDigits'
     test_samples, test_ls = knn.load_sample_set(test_dir)
     test_results = knn.get_test_samples_labels(k, train_samples, train_ls, test_samples,
-                                               get_k_min_func=knn.get_k_min_e_dist, get_label_func=knn.get_label_by_wknn)
+                                               get_k_min_func=knn.get_k_min_e_dist, get_label_func=knn.get_label_by_knn)
     check = np.array(test_ls.reshape(-1, 1) == test_results.reshape(-1, 1))
     trues = np.sum(check)
     all = check.size
@@ -57,8 +57,14 @@ def test_get_test_samples_labels():
     print(all)
 
 
+def test_get_ints_m_trans_matrix():
+    train_dir = './digits/trainingDigits'
+    train_samples, train_ls = knn.load_sample_set(train_dir)
+    knn.get_ints_m_trans_matrix(train_samples)
+
 if __name__ == '__main__':
     # test_load_instance()
     # test_load_sample_set()
     # test_several_instance_knn()
-    test_get_test_samples_labels()
+    # test_get_test_samples_labels()
+    test_get_ints_m_trans_matrix()
