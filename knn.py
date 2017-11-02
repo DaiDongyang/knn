@@ -44,7 +44,7 @@ def load_sample_set(fold_path):
     return np.array(instances), np.array(ls).transpose()
 
 
-def pca_trans(train_samples, test_samples, new_d):
+def pca_trans_with_new_d(train_samples, test_samples, new_d):
     miu = np.average(train_samples, axis=0)
     avg_trains = train_samples - miu
     cov = np.cov(avg_trains.T)
@@ -55,8 +55,29 @@ def pca_trans(train_samples, test_samples, new_d):
     trains_m = Q[:, indexs]
     new_trains = avg_trains.dot(trains_m)
     new_test = (test_samples - miu).dot(trains_m)
-    return new_trains, new_test
+    return new_trains, new_test, new_d
 
+
+def pca_trans_with_threshold(train_samples, test_samples, threshold):
+    miu = np.average(train_samples, axis=0)
+    avg_trains = train_samples - miu
+    cov = np.cov(avg_trains.T)
+    c_roots, Q = np.linalg.eig(cov)
+    indexed_c_roots = zip(c_roots, range(len(c_roots)))
+    sorted_indexed_c_roots = sorted(indexed_c_roots, reverse=True, key=lambda x: x[0])
+    t = (np.sum(c_roots))*threshold
+    indexs = []
+    sum = 0
+    for item in sorted_indexed_c_roots:
+        sum += item[0]
+        indexs.append(item[1])
+        if sum > t:
+            break
+    trains_m = Q[:, indexs]
+    new_trains = avg_trains.dot(trains_m)
+    new_test = (test_samples - miu).dot(trains_m)
+    new_d = len(indexs)
+    return new_trains, new_test, new_d
 
 
 # get k nearest euclidean distance index to a new instance with training sample
@@ -118,9 +139,14 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
 
 def get_test_samples_labels(k, train_samples, train_ls, test_samples, get_k_min_func, get_label_func):
     result = []
+    new_d = 8
+    pca_threshold = 0.8
     # m transform
     # trans_m = get_ints_m_trans_matrix(train_samples)
     # tran_samples, test_samples = trans_featrues(train_samples, test_samples, trans_m)
+    # train_samples, test_samples, new_d = pca_trans_with_threshold(train_samples, test_samples, pca_threshold)
+    train_samples, test_samples, new_d = pca_trans_with_new_d(train_samples, test_samples, new_d)
+    print(new_d)
     # todo: remove tqdm
     for inst in tqdm(test_samples):
         k_idx, k_dist = get_k_min_func(train_samples, inst, k)
