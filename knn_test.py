@@ -66,5 +66,5 @@ if __name__ == '__main__':
     # test_load_instance()
     # test_load_sample_set()
     # test_several_instance_knn()
-    # test_get_test_samples_labels()
-    test_get_ints_m_trans_matrix()
+    test_get_test_samples_labels()
+    # test_get_ints_m_trans_matrix()

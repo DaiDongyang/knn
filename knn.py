@@ -44,6 +44,8 @@ def load_sample_set(fold_path):
 
 # get k nearest euclidean distance index to a new instance with training sample
 def get_k_min_e_dist(train_samples, new_inst, k):
+    # diff = train_samples - new_inst
+    # dist_sq = np.diag(np.dot(diff, diff.T))
     diff_sq_matrix = (train_samples - new_inst) ** 2
     dist_sq = np.sum(diff_sq_matrix, axis=1)
     idx = np.argpartition(dist_sq, k)
@@ -69,9 +71,15 @@ def get_ints_m_trans_matrix(train_samples):
     pinv_ksi = np.linalg.pinv(np.diag(ksi))
     pinv_ksi_sqrt = np.sqrt(pinv_ksi)
     trans_m = np.dot(Q, pinv_ksi_sqrt)
-    test = np.dot(trans_m, trans_m.T) - np.linalg.pinv(trains_cov)
-    print(np.sum(test))
+    test = (np.dot(trans_m, trans_m.T) - np.linalg.pinv(trains_cov))**2
+    print(np.sum(test.flat))
     return trans_m
+
+
+def trans_featrues(train_samples, test_samples, trans_m):
+    train_samples = np.dot(train_samples, trans_m)
+    test_samples = np.dot(test_samples, trans_m)
+    return train_samples, test_samples
 
 
 # get a label simple by knn method
@@ -95,6 +103,9 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
 
 def get_test_samples_labels(k, train_samples, train_ls, test_samples, get_k_min_func, get_label_func):
     result = []
+    # m transform
+    trans_m = get_ints_m_trans_matrix(train_samples)
+    tran_samples, test_samples = trans_featrues(train_samples, test_samples, trans_m)
     # todo: remove tqdm
     for inst in tqdm(test_samples):
         k_idx, k_dist = get_k_min_func(train_samples, inst, k)
