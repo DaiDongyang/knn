@@ -49,7 +49,7 @@ def test_get_test_samples_labels():
     test_dir = './digits/testDigits'
     test_samples, test_ls = knn.load_sample_set(test_dir)
     test_results = knn.get_test_samples_labels(k, train_samples, train_ls, test_samples,
-                                               get_k_min_func=knn.get_k_min_m_dist, get_label_func=knn.get_label_by_knn)
+                                               get_k_min_func=knn.get_k_min_e_dist_with_kdtree, get_label_func=knn.get_label_by_knn)
     check = np.array(test_ls.reshape(-1, 1) == test_results.reshape(-1, 1))
     trues = np.sum(check)
     all = check.size

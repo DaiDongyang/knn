@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import KDTree
 from os.path import join
 from collections import defaultdict
 from tqdm import tqdm
@@ -9,6 +10,7 @@ from tqdm import tqdm
 inf_suffix = '.txt'
 
 trains_cov_pinv = None
+kd_tree = None
 
 
 def get_trains_conv_pinv(train_samples):
@@ -20,6 +22,15 @@ def get_trains_conv_pinv(train_samples):
         # train_m = get_ints_m_trans_matrix(train_samples)
         # trains_cov_pinv = train_m.dot(train_m.T)
     return trains_cov_pinv
+
+
+def get_kd_tree(train_samples):
+    global kd_tree
+    if kd_tree is None:
+        m, _ = train_samples.shape
+        ls = np.array(list(range(m)))
+        kd_tree = KDTree.construct_kd_tree(train_samples, ls)
+    return kd_tree
 
 
 # load a instance from a file
@@ -90,6 +101,16 @@ def get_k_min_e_dist(train_samples, new_inst, k):
     return k_idx, np.sqrt(dist_sq[k_idx])
 
 
+def get_k_min_e_dist_with_kdtree(train_samples, new_inst, k):
+    kdtree = get_kd_tree(train_samples)
+    knn_heaps = KDTree.find_knn_from_kd_tree(new_inst, kdtree, k)
+    idx = np.array([item[2] for item in knn_heaps.knns[1:]])
+    dist_sq = np.array([item[0] for item in knn_heaps.knns[1:]])
+    # print(idx)
+    # print(dist_sq)
+    return idx, np.sqrt(dist_sq)
+
+
 # method for calculate Mahalay distance before optimization
 def get_k_min_m_dist(train_samples, inst, k):
     pinv = get_trains_conv_pinv(train_samples)
@@ -139,14 +160,14 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
 
 def get_test_samples_labels(k, train_samples, train_ls, test_samples, get_k_min_func, get_label_func):
     result = []
-    new_d = 8
-    pca_threshold = 0.8
+    # new_d = 8
+    # pca_threshold = 0.8
     # m transform
     # trans_m = get_ints_m_trans_matrix(train_samples)
     # tran_samples, test_samples = trans_featrues(train_samples, test_samples, trans_m)
     # train_samples, test_samples, new_d = pca_trans_with_threshold(train_samples, test_samples, pca_threshold)
-    train_samples, test_samples, new_d = pca_trans_with_new_d(train_samples, test_samples, new_d)
-    print(new_d)
+    # train_samples, test_samples, new_d = pca_trans_with_new_d(train_samples, test_samples, new_d)
+    # print(new_d)
     # todo: remove tqdm
     for inst in tqdm(test_samples):
         k_idx, k_dist = get_k_min_func(train_samples, inst, k)
