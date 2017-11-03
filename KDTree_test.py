@@ -53,8 +53,18 @@ def test_search_sub_tree():
     KDTree.search_sub_tree((0, 0), kd_tree, knn_heap)
     print(knn_heap.knns)
 
+
+def test_find_knn_from_kd_tree():
+    k = 3
+    samples = np.array([[2, 3], [5, 4], [9, 6], [4, 7], [8, 1], [7, 2]])
+    ls = np.array(list(range(6)))
+    kd_tree = KDTree.construct_kd_tree(samples, ls)
+    sample = np.array([4, 6])
+    knn_heap = KDTree.find_knn_from_kd_tree(sample, kd_tree, k)
+    print(knn_heap.knns)
+
 if __name__ == '__main__':
     # test_construct_kd_tree()
     # test_knn_heap()
-    test_search_sub_tree()
-
+    # test_search_sub_tree()
+    test_find_knn_from_kd_tree()

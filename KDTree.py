@@ -99,3 +99,48 @@ def search_sub_tree(sample, sub_tree, knn_heap):
     search_sub_tree(sample, sub_tree.left_child, knn_heap)
     search_sub_tree(sample, sub_tree.right_child, knn_heap)
     return
+
+
+# def get_neighbor_tree(sample, f_node):
+#     idx = f_node.cur_feature
+#     if sample[idx] > f_node.instance[idx]
+
+def search_bottom_up(sample, node, knn_heap, from_left):
+    # if node is None:
+    #     return
+    diff = node.instance - sample
+    dist_sq = np.dot(diff, diff.T)
+    if dist_sq < knn_heap.get_max_dist_sq():
+        knn_heap.update_value(dist_sq, node.instance, node.label)
+    if from_left:
+        search_sub_tree(sample, node.right_child, knn_heap)
+    else:
+        search_sub_tree(sample, node.left_child, knn_heap)
+    if node.father is None:
+        return
+    elif node.father.left_child is node:
+        search_bottom_up(sample, node.father, knn_heap, True)
+    else:
+        search_bottom_up(sample, node.father, knn_heap, False)
+
+
+# return (node, isFromLeft)
+def get_related_leaf(sample, kd_tree):
+    idx = kd_tree.cur_feature
+    if sample[idx] < kd_tree.instance[idx]:
+        if kd_tree.left_child is None:
+            return kd_tree, True
+        else:
+            return get_related_leaf(sample, kd_tree.left_child)
+    else:
+        if kd_tree.right_child is None:
+            return kd_tree, False
+        else:
+            return get_related_leaf(sample, kd_tree.right_child)
+
+
+def find_knn_from_kd_tree(sample, kd_tree, k):
+    related_leaf, is_from_left = get_related_leaf(sample, kd_tree)
+    knn_heap = KnnHeap(k)
+    search_bottom_up(sample, related_leaf, knn_heap, is_from_left)
+    return knn_heap
