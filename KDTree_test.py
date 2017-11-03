@@ -45,7 +45,7 @@ def test_knn_heap():
 
 
 def test_search_sub_tree():
-    capacity = 5
+    capacity = 2
     samples = np.array([[2, 3], [5, 4], [9, 6], [4, 7], [8, 1], [7, 2]])
     ls = np.array(list(range(6)))
     kd_tree = KDTree.construct_kd_tree(samples, ls)

@@ -91,11 +91,11 @@ def search_sub_tree(sample, sub_tree, knn_heap):
         return
     diff = sub_tree.instance - sample
     dist_sq = np.dot(diff, diff.T)
-    print(sub_tree.instance)
+    # print(sub_tree.instance)
     if dist_sq < knn_heap.get_max_dist_sq():
         knn_heap.update_value(dist_sq, sub_tree.instance, sub_tree.label)
-    print(knn_heap.knns)
-    print()
+    # print(knn_heap.knns)
+    # print()
     search_sub_tree(sample, sub_tree.left_child, knn_heap)
     search_sub_tree(sample, sub_tree.right_child, knn_heap)
     return
