@@ -166,6 +166,8 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
     counter = defaultdict(lambda: 0)
     min_dist = np.min(k_dist)
     max_dist = np.max(k_dist)
+    if max_dist == min_dist:
+        return get_label_by_knn(train_ls, k_idx, k_dist)
     for idx, dist in zip(k_idx, k_dist):
         counter[train_ls[idx]] += (max_dist - dist) / (max_dist - min_dist)
     l, _ = max(counter.items(), key=lambda x: x[1])
@@ -245,4 +247,3 @@ if __name__ == '__main__':
     print('macro_F1 =', macro_F_1)
     print('execution time =', elapsed)
     print('dimension =', d)
-
