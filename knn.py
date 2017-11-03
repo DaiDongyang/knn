@@ -1,10 +1,9 @@
 import numpy as np
 import os
+import time
 import KDTree
 from os.path import join
 from collections import defaultdict
-from tqdm import tqdm
-
 
 # input file suffix
 inf_suffix = '.txt'
@@ -76,7 +75,7 @@ def pca_trans_with_threshold(train_samples, test_samples, threshold):
     c_roots, Q = np.linalg.eig(cov)
     indexed_c_roots = zip(c_roots, range(len(c_roots)))
     sorted_indexed_c_roots = sorted(indexed_c_roots, reverse=True, key=lambda x: x[0])
-    t = (np.sum(c_roots))*threshold
+    t = (np.sum(c_roots)) * threshold
     indexs = []
     sum = 0
     for item in sorted_indexed_c_roots:
@@ -92,7 +91,7 @@ def pca_trans_with_threshold(train_samples, test_samples, threshold):
 
 
 # get k nearest euclidean distance index to a new instance with training sample
-def get_k_min_e_dist(train_samples, new_inst, k):
+def get_knn_e_dist(train_samples, new_inst, k):
     diff_sq_matrix = (train_samples - new_inst) ** 2
     dist_sq = np.sum(diff_sq_matrix, axis=1)
     idx = np.argpartition(dist_sq, k)
@@ -101,7 +100,7 @@ def get_k_min_e_dist(train_samples, new_inst, k):
     return k_idx, np.sqrt(dist_sq[k_idx])
 
 
-def get_k_min_e_dist_with_kdtree(train_samples, new_inst, k):
+def get_knn_e_dist_with_kdtree(train_samples, new_inst, k):
     kdtree = get_kd_tree(train_samples)
     knn_heaps = KDTree.find_knn_from_kd_tree(new_inst, kdtree, k)
     idx = np.array([item[2] for item in knn_heaps.knns[1:]])
@@ -112,7 +111,7 @@ def get_k_min_e_dist_with_kdtree(train_samples, new_inst, k):
 
 
 # method for calculate Mahalay distance before optimization
-def get_k_min_m_dist(train_samples, inst, k):
+def get_knn_m_dist(train_samples, inst, k):
     pinv = get_trains_conv_pinv(train_samples)
     diff_matrix = train_samples - inst
     dist_sq = np.diag(np.dot(np.dot(diff_matrix, pinv), diff_matrix.T))
@@ -158,19 +157,76 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
     return l
 
 
-def get_test_samples_labels(k, train_samples, train_ls, test_samples, get_k_min_func, get_label_func):
+def get_test_samples_labels(k, train_samples, train_ls, test_samples, get_knn_func, get_label_func, pca_parameter):
+    _, dims = train_samples.shape
+    if not (pca_parameter is None) and pca_parameter > 0:
+        if pca_parameter < 1:
+            train_samples, test_samples, dims = pca_trans_with_threshold(train_samples, test_samples, pca_parameter)
+        else:
+            train_samples, test_samples, dims = pca_trans_with_new_d(train_samples, test_samples, pca_parameter)
     result = []
-    # new_d = 8
-    # pca_threshold = 0.8
-    # m transform
-    # trans_m = get_ints_m_trans_matrix(train_samples)
-    # tran_samples, test_samples = trans_featrues(train_samples, test_samples, trans_m)
-    # train_samples, test_samples, new_d = pca_trans_with_threshold(train_samples, test_samples, pca_threshold)
-    # train_samples, test_samples, new_d = pca_trans_with_new_d(train_samples, test_samples, new_d)
-    # print(new_d)
-    # todo: remove tqdm
-    for inst in tqdm(test_samples):
-        k_idx, k_dist = get_k_min_func(train_samples, inst, k)
+    for inst in test_samples:
+        k_idx, k_dist = get_knn_func(train_samples, inst, k)
         l = get_label_func(train_ls, k_idx, k_dist)
         result.append(l)
-    return np.array(result).transpose()
+    return np.array(result).transpose(), dims
+
+
+def result_evaluate(g_ls, r_ls):
+    g_ls = g_ls.reshape(-1, 1)
+    r_ls = r_ls.reshape(-1, 1)
+    check = np.array(g_ls == r_ls)
+    total_num = g_ls.size
+    acc = np.sum(check) / total_num
+    labels = np.arange(10)
+    positives = np.zeros(labels.size)
+    trues = np.zeros(labels.size)
+    tps = np.zeros(labels.size)
+    for i in range(total_num):
+        positives[r_ls[i]] += 1
+        trues[g_ls[i]] += 1
+        # print(r_ls.shape)
+        # print(g_ls.shape)
+        # print(i)
+        # print(r_ls[i])
+        # print(g_ls[i])
+        if r_ls[i] == g_ls[i]:
+            tps[r_ls[i]] += 1
+    pre = tps/positives
+    rec = tps/trues
+    F1 = (2 * pre * rec)/(pre + rec)
+    macro_pre = np.average(pre)
+    macro_rec = np.average(rec)
+    macro_F1 = (2 * macro_pre * macro_rec)/(macro_pre + macro_rec)
+    return acc, pre, rec, F1, macro_pre, macro_rec, macro_F1
+
+
+if __name__ == '__main__':
+    train_dir = './digits/trainingDigits'
+    test_dir = './digits/testDigits'
+    k = 7
+    get_knn_function = get_knn_e_dist  # or get_k_min_e_dist_with_kd_tree, or get_k_min_m_dist
+    get_label_function = get_label_by_knn  # or get_label_by_wknn
+    pca_param = 8
+
+    train_set, train_labels = load_sample_set(train_dir)
+    test_set, ground_labels = load_sample_set(test_dir)
+
+    print('processing...')
+    start_time = time.time()
+    result_labels, d = get_test_samples_labels(k, train_set, train_labels, test_set, get_knn_function, get_label_function,
+                                               pca_param)
+    end_time = time.time()
+    elapsed = end_time - start_time
+
+    accuracy, precision, recall, F_1, macro_precision, macro_recall, macro_F_1 = result_evaluate(ground_labels, result_labels)
+    print('accuracy =', accuracy)
+    print('precision =', precision)
+    print('recall =', recall)
+    print('F1 = ', F_1)
+    print('macro_precision =', macro_precision)
+    print('macro_recall =', macro_recall)
+    print('macro_F1 =', macro_F_1)
+    print('execution time =', elapsed)
+    print('dimension =', d)
+

@@ -36,7 +36,7 @@ def test_several_instance_knn():
     result = []
     for test_f in tqdm(test_fs):
         inst, l = knn.load_instance(test_dir, test_f)
-        k_idx, k_dist = knn.get_k_min_m_dist(train_sample, inst, k)
+        k_idx, k_dist = knn.get_knn_m_dist(train_sample, inst, k)
         l = knn.get_label_by_knn(train_ls, k_idx, k_dist)
         result.append(l)
     print(result)
@@ -48,8 +48,9 @@ def test_get_test_samples_labels():
     train_samples, train_ls = knn.load_sample_set(train_dir)
     test_dir = './digits/testDigits'
     test_samples, test_ls = knn.load_sample_set(test_dir)
-    test_results = knn.get_test_samples_labels(k, train_samples, train_ls, test_samples,
-                                               get_k_min_func=knn.get_k_min_e_dist_with_kdtree, get_label_func=knn.get_label_by_knn)
+    test_results, dims = knn.get_test_samples_labels(k, train_samples, train_ls, test_samples,
+                                                     get_knn_func=knn.get_knn_e_dist_with_kdtree,
+                                                     get_label_func=knn.get_label_by_knn, pca_parameter=32)
     check = np.array(test_ls.reshape(-1, 1) == test_results.reshape(-1, 1))
     trues = np.sum(check)
     all = check.size
