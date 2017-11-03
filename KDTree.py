@@ -63,11 +63,11 @@ class KnnHeap:
             self.knns[1] = (dist_sq, instance, label)
             i = 1
             while 2 * i + 1 <= self.cur_max_idx and (
-                    self.knns[2 * i][0] > self.knns[i][0] or self.knns[2 * i + 1][0] > self.knns[i][0]):
+                    self.knns[2 * i][0] > dist_sq or self.knns[2 * i + 1][0] > dist_sq):
                 j = (2 * i) if (self.knns[2 * i][0] > self.knns[2 * i + 1][0]) else (2 * i + 1)
                 self.knns[i] = self.knns[j]
                 i = j
-            if 2 * i <= self.cur_max_idx and self.knns[2 * i][0] > self.knns[i][0]:
+            if 2 * i <= self.cur_max_idx and self.knns[2 * i][0] > dist_sq:
                 self.knns[i] = self.knns[2 * i]
                 i = 2 * i
             self.knns[i] = (dist_sq, instance, label)
