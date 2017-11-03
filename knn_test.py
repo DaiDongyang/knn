@@ -62,6 +62,7 @@ def test_get_ints_m_trans_matrix():
     train_samples, train_ls = knn.load_sample_set(train_dir)
     knn.get_ints_m_trans_matrix(train_samples)
 
+
 if __name__ == '__main__':
     # test_load_instance()
     # test_load_sample_set()

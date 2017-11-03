@@ -5,8 +5,9 @@ class Node:
     def __init__(self, inst, label, min_a, max_a, cur_f, f_node):
         self.instance = inst
         self.label = label
-        self.min_array = min_a
-        self.max_array = max_a
+        self.arrays = np.empty((2, len(inst)))
+        self.arrays[0, :] = min_a
+        self.arrays[1, :] = max_a
         self.cur_feature = cur_f
         self.father = f_node
         self.left_child = None
@@ -70,3 +71,28 @@ class KnnHeap:
                 self.knns[i] = self.knns[2 * i]
                 i = 2 * i
             self.knns[i] = (dist_sq, instance, label)
+
+
+def get_brother(node):
+    if node.father is None:
+        return None
+    if node is node.father.left_child:
+        return node.father.right_child
+    else:
+        return node.father.left_child
+
+
+def search_sub_tree(sample, sub_tree, knn_heap):
+    if sub_tree is None:
+        return
+    v_d = np.min(np.abs(sub_tree.knns - sample), axis=0)
+    dist_sq = np.dot(v_d, v_d.T)
+    if dist_sq > knn_heap.get_max_dist_sq():
+        return
+    diff = sub_tree.instance - sample
+    dist_sq = np.dot(diff, diff.T)
+    if dist_sq < knn_heap.get_max_dist_sq():
+        knn_heap.update_value(dist_sq, sub_tree.instance, sub_tree.label)
+    search_sub_tree(sample, sub_tree.left_child, knn_heap)
+    search_sub_tree(sample, sub_tree.right_child, knn_heap)
+    return
