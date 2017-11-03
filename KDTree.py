@@ -33,6 +33,7 @@ def construct_kd_node(samples, labels, feature, father_node):
 
 
 def construct_kd_tree(samples, ls):
+    # print(samples.dtype)
     return construct_kd_node(samples, ls, 0, None)
 
 

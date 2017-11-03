@@ -4,6 +4,7 @@ import time
 import KDTree
 from os.path import join
 from collections import defaultdict
+from tqdm import tqdm
 
 # input file suffix
 inf_suffix = '.txt'
@@ -26,10 +27,18 @@ def get_trains_conv_pinv(train_samples):
 def get_kd_tree(train_samples):
     global kd_tree
     if kd_tree is None:
+        # print(train_samples.dtype)
         m, _ = train_samples.shape
         ls = np.array(list(range(m)))
         kd_tree = KDTree.construct_kd_tree(train_samples, ls)
     return kd_tree
+
+
+def release_cache():
+    global trains_cov_pinv
+    global kd_tree
+    trains_cov_pinv = None
+    kd_tree = None
 
 
 # load a instance from a file
@@ -59,10 +68,14 @@ def pca_trans_with_new_d(train_samples, test_samples, new_d):
     avg_trains = train_samples - miu
     cov = np.cov(avg_trains.T)
     c_roots, Q = np.linalg.eig(cov)
+    c_roots = c_roots.real
+    Q = Q.real
+    # print(c_roots.dtype)
     indexed_c_roots = zip(c_roots, range(len(c_roots)))
     sorted_indexed_c_roots = sorted(indexed_c_roots, reverse=True, key=lambda x: x[0])
     indexs = [item[1] for item in sorted_indexed_c_roots[0:new_d]]
     trains_m = Q[:, indexs]
+    # print(trains_m.dtype)
     new_trains = avg_trains.dot(trains_m)
     new_test = (test_samples - miu).dot(trains_m)
     return new_trains, new_test, new_d
@@ -73,6 +86,8 @@ def pca_trans_with_threshold(train_samples, test_samples, threshold):
     avg_trains = train_samples - miu
     cov = np.cov(avg_trains.T)
     c_roots, Q = np.linalg.eig(cov)
+    c_roots = c_roots.real
+    Q = Q.real
     indexed_c_roots = zip(c_roots, range(len(c_roots)))
     sorted_indexed_c_roots = sorted(indexed_c_roots, reverse=True, key=lambda x: x[0])
     t = (np.sum(c_roots)) * threshold
@@ -165,10 +180,11 @@ def get_test_samples_labels(k, train_samples, train_ls, test_samples, get_knn_fu
         else:
             train_samples, test_samples, dims = pca_trans_with_new_d(train_samples, test_samples, pca_parameter)
     result = []
-    for inst in test_samples:
+    for inst in tqdm(test_samples):
         k_idx, k_dist = get_knn_func(train_samples, inst, k)
         l = get_label_func(train_ls, k_idx, k_dist)
         result.append(l)
+    release_cache()
     return np.array(result).transpose(), dims
 
 
@@ -204,17 +220,17 @@ def result_evaluate(g_ls, r_ls):
 if __name__ == '__main__':
     train_dir = './digits/trainingDigits'
     test_dir = './digits/testDigits'
-    k = 7
-    get_knn_function = get_knn_e_dist  # or get_k_min_e_dist_with_kd_tree, or get_k_min_m_dist
+    k_value = 3
+    get_knn_function = get_knn_e_dist_with_kdtree  # or get_k_min_e_dist_with_kd_tree, or get_k_min_m_dist
     get_label_function = get_label_by_knn  # or get_label_by_wknn
-    pca_param = 8
+    pca_param = 16
 
     train_set, train_labels = load_sample_set(train_dir)
     test_set, ground_labels = load_sample_set(test_dir)
 
     print('processing...')
     start_time = time.time()
-    result_labels, d = get_test_samples_labels(k, train_set, train_labels, test_set, get_knn_function, get_label_function,
+    result_labels, d = get_test_samples_labels(k_value, train_set, train_labels, test_set, get_knn_function, get_label_function,
                                                pca_param)
     end_time = time.time()
     elapsed = end_time - start_time
