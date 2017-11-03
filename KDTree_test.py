@@ -50,7 +50,7 @@ def test_search_sub_tree():
     ls = np.array(list(range(6)))
     kd_tree = KDTree.construct_kd_tree(samples, ls)
     knn_heap = KDTree.KnnHeap(capacity)
-    KDTree.search_sub_tree((0, 0), kd_tree)
+    KDTree.search_sub_tree((0, 0), kd_tree, knn_heap)
     print(knn_heap.knns)
 
 if __name__ == '__main__':

@@ -55,7 +55,7 @@ class KnnHeap:
             self.cur_max_idx += 1
             self.knns.append((dist_sq, instance, label))
             i = self.cur_max_idx
-            while i > 0 and self.knns[i][0] > self.knns[int(i / 2)][0]:
+            while i > 0 and dist_sq > self.knns[int(i / 2)][0]:
                 self.knns[i] = self.knns[int(i / 2)]
                 i = int(i / 2)
             self.knns[i] = (dist_sq, instance, label)
@@ -85,14 +85,17 @@ def get_brother(node):
 def search_sub_tree(sample, sub_tree, knn_heap):
     if sub_tree is None:
         return
-    v_d = np.min(np.abs(sub_tree.knns - sample), axis=0)
+    v_d = np.min(np.abs(sub_tree.arrays - sample), axis=0)
     dist_sq = np.dot(v_d, v_d.T)
     if dist_sq > knn_heap.get_max_dist_sq():
         return
     diff = sub_tree.instance - sample
     dist_sq = np.dot(diff, diff.T)
+    print(sub_tree.instance)
     if dist_sq < knn_heap.get_max_dist_sq():
         knn_heap.update_value(dist_sq, sub_tree.instance, sub_tree.label)
+    print(knn_heap.knns)
+    print()
     search_sub_tree(sample, sub_tree.left_child, knn_heap)
     search_sub_tree(sample, sub_tree.right_child, knn_heap)
     return
