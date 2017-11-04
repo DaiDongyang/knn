@@ -225,7 +225,7 @@ if __name__ == '__main__':
     k_value = 3
     get_knn_function = get_knn_e_dist_with_kdtree  # or get_k_min_e_dist_with_kd_tree, or get_k_min_m_dist
     get_label_function = get_label_by_knn  # or get_label_by_wknn
-    pca_param = 16
+    pca_param = 0
 
     train_set, train_labels = load_sample_set(train_dir)
     test_set, ground_labels = load_sample_set(test_dir)

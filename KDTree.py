@@ -86,8 +86,19 @@ def get_brother(node):
 def search_sub_tree(sample, sub_tree, knn_heap):
     if sub_tree is None:
         return
-    v_d = np.min(np.abs(sub_tree.arrays - sample), axis=0)
-    dist_sq = np.dot(v_d, v_d.T)
+    # v_d = np.min(np.abs(sub_tree.arrays - sample), axis=0)
+
+    # dist_sq = np.dot(v_d, v_d.T)
+    # dist_sq = 0
+    # diffs = sub_tree.arrays - sample
+    # for item in diffs.T:
+    #     if item[0] * item[1] > 0:
+    #         dist_sq += (np.min(np.abs(item)))**2
+    diffs = sub_tree.arrays - sample
+    idx = diffs[0, :] * diffs[1, :] > 0
+    v_d = np.min(np.abs(diffs), axis=0)
+    v_d1 = v_d[idx]
+    dist_sq = np.dot(v_d1, v_d1.T)
     if dist_sq > knn_heap.get_max_dist_sq():
         return
     diff = sub_tree.instance - sample
