@@ -11,11 +11,17 @@ if __name__ == '__main__':
     train_samples, train_ls = knn.load_sample_set(train_dir)
     test_samples, ground_ls = knn.load_sample_set(test_dir)
     ks = [3, 5, 7, 9]
+    # ks = [3, 5, 7, 9, 11, 13]
     get_knn_funcs = [knn.get_knn_e_dist, knn.get_knn_e_dist_with_kdtree, knn.get_knn_m_dist]
     get_knn_funcs_str = ['get_knn_e_dist', 'get_knn_e_dist_with_kdtree', 'get_knn_m_dist']
+    # get_knn_funcs = [knn.get_knn_e_dist]
+    # get_knn_funcs_str = ['get_knn_e_dist']
     get_label_funcs = [knn.get_label_by_knn, knn.get_label_by_wknn]
     get_label_funcs_str = ['get_label_by_knn', 'get_label_by_wknn']
-    pca_parameters = [0, 4, 8, 16, 32, 64, 128]
+    # get_label_funcs = [knn.get_label_by_wknn]
+    # get_label_funcs_str = ['get_label_by_wknn']
+    pca_parameters = [0, 4, 8, 16, 32, 64, 128, 256]
+    # pca_parameters = [16]
     results = [
         ['k', 'get_knn_function', 'get_label_function', 'pca_parameters', 'accuracy', 'macro_precision', 'macro_recall',
          'macro_F1', 'execution_time', 'd']]

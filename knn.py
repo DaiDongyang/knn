@@ -64,6 +64,9 @@ def load_sample_set(fold_path):
 
 
 def pca_trans_with_new_d(train_samples, test_samples, new_d):
+    _, old_d = train_samples.shape
+    if new_d >= old_d:
+        return train_samples, test_samples, old_d
     miu = np.average(train_samples, axis=0)
     avg_trains = train_samples - miu
     cov = np.cov(avg_trains.T)
@@ -222,10 +225,10 @@ def result_evaluate(g_ls, r_ls):
 if __name__ == '__main__':
     train_dir = './digits/trainingDigits'
     test_dir = './digits/testDigits'
-    k_value = 3
-    get_knn_function = get_knn_e_dist_with_kdtree  # or get_k_min_e_dist_with_kd_tree, or get_k_min_m_dist
+    k_value = 5 # 7 9 11
+    get_knn_function = get_knn_m_dist  # or get_k_min_e_dist_with_kd_tree, or get_k_min_m_dist
     get_label_function = get_label_by_knn  # or get_label_by_wknn
-    pca_param = 0
+    pca_param = 8  #[None, 0.5, 32, 64]
 
     train_set, train_labels = load_sample_set(train_dir)
     test_set, ground_labels = load_sample_set(test_dir)
