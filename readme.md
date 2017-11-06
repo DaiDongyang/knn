@@ -163,10 +163,10 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
 + 在当前目录下，执行指令`python knn.py`便可以运行程序。
 	+ 运行结果如下图：
 
-	![](/home/dai/Projects/python_projects/knn/document_imgs/result_pic.png)
+	![](./document_imgs/result_pic.png)
 	+ 可以更改代码中的配置项，来使用不同的方法对测试样本进行分类。其中`train_dir`代表训练样本所在的目录，`test_dir`代表测试样本所在的目录。`k_value`代表k的取值。`get_knn_function`代表获取k近邻的方法，`get_label_function`代表根据k个近邻，确定测试样本类别的方法，`pca_param`代表使用pca算法降维的参数，它们的用法和意义参照`get_test_samples_labels()`的参数`get_knn_func, get_label_func, pca_paramete`。
 
-	![](/home/dai/Projects/python_projects/knn/document_imgs/setting_example.png)
+	![](./document_imgs/setting_example.png)
 
 ## 实验过程及结果分析
 ### 实验
@@ -180,7 +180,7 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
 
 `result_table.csv`的截图如下：
 
-![](/home/dai/Projects/python_projects/knn/document_imgs/result_table.png)
+![](./document_imgs/result_table.png)
 
 ### 结果
 
