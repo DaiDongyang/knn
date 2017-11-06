@@ -1,5 +1,5 @@
 # KNN实验
-#### 代东洋, 2017210885, ddy17@mails.tsinghua.edu.cn
+
 ## 简介
 本次实验使用K-近邻算法对手写数字进行分类。
 
@@ -51,7 +51,7 @@ kd树每一个子树对应于一个超矩形区域。如果测试样本到超矩
 
 $$d = \sqrt{(x-y)^T\Sigma^{-1}(x-y)}$$
 
-其中$x=(x_1, x_2, ...x_d)^T$ ， $y = (y_1, y_2, ... y_d)^T$ 
+其中$x=(x_1, x_2, ...x_d)^T$ ， $y = (y_1, y_2, ... y_d)^T$
 
 不考虑$\Sigma$不可逆的情况，由于$\Sigma$是实对称矩阵，因此
 $$\Sigma = Q \Lambda Q^T$$
@@ -162,11 +162,11 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
 
 + 在当前目录下，执行指令`python knn.py`便可以运行程序。
 	+ 运行结果如下图：
-	
-	![](./document_imgs/result_pic.png)
+
+	![](/home/dai/Projects/python_projects/knn/document_imgs/result_pic.png)
 	+ 可以更改代码中的配置项，来使用不同的方法对测试样本进行分类。其中`train_dir`代表训练样本所在的目录，`test_dir`代表测试样本所在的目录。`k_value`代表k的取值。`get_knn_function`代表获取k近邻的方法，`get_label_function`代表根据k个近邻，确定测试样本类别的方法，`pca_param`代表使用pca算法降维的参数，它们的用法和意义参照`get_test_samples_labels()`的参数`get_knn_func, get_label_func, pca_paramete`。
-	
-	![](./document_imgs/setting_example.png)
+
+	![](/home/dai/Projects/python_projects/knn/document_imgs/setting_example.png)
 
 ## 实验过程及结果分析
 ### 实验
@@ -180,7 +180,7 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
 
 `result_table.csv`的截图如下：
 
-![](./document_imgs/result_table.png)
+![](/home/dai/Projects/python_projects/knn/document_imgs/result_table.png)
 
 ### 结果
 
@@ -271,35 +271,3 @@ def get_label_by_wknn(train_ls, k_idx, k_dist):
 | 13|0.6945 |0.9830| 0.9828|
 
 通过的上面的实验可以看出，当 $k \in \{3, 5, 7, 9, 11, 13\}$ 时。k的变化对运行时间的影响不大。随着k的增大，分类的性能越来越差，这一点对于knn算法来说尤其明显（wknn还没那么明显）。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
